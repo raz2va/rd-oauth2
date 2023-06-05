@@ -7,6 +7,7 @@ var express = require('express'),
 require('dotenv').config();
 
 const model = require('./src/model.js');
+const axios = require("axios");
 
 var app = express();
 
@@ -27,8 +28,16 @@ app.all('/security/oauth/token', obtainToken);
 // 	res.send('s area!');
 // });
 
-app.use('/', authenticateRequest, require('./src/dummy_routes'))
+const redirectUrl = process.env.REDIRECT_BASE_URL
 
+if (redirectUrl) {
+	const username = process.env.REDIRECT_USER,
+		password = process.env.REDIRECT_PASSWORD,
+		auth = "Basic " + new Buffer.from(username + ":" + password).toString("base64");
+	app.use('/', authenticateRequest, require('./src/redirect_route')(redirectUrl, auth))
+} else {
+	app.use('/', authenticateRequest, require('./src/dummy_routes'))
+}
 
 const port = process.env.PORT || 3011
 app.listen(port, () => {
