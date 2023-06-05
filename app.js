@@ -20,7 +20,7 @@ app.oauth = new OAuth2Server({
 	debug: true,
 });
 
-app.all('/oauth/token', obtainToken);
+app.all('/security/oauth/token', obtainToken);
 
 // app.get('/', authenticateRequest, function(req, res) {
 //
@@ -62,7 +62,7 @@ function authenticateRequest(req, res, next) {
 	var response = new Response(res);
 
 	return app.oauth.authenticate(request, response)
-		.then(function(token) {
+		.then(token => {
 
 			next();
 		}).catch(function(err) {
