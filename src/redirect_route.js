@@ -14,7 +14,8 @@ module.exports = (redirect_url, authorisation) => {
         "url": url,
         "data": req.body
       })
-      res.set('Content-Type', 'application/vnd.eats.order.v2+json').send(result.data)
+      res.set('content-type', result.headers['content-type'] || 'application/json')
+      res.send(result.data)
     } catch (err) {
       res.status(400).send(err.message)
     }
