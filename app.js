@@ -7,13 +7,17 @@ var express = require('express'),
 require('dotenv').config();
 
 const model = require('./src/model.js');
-const axios = require("axios");
 
 var app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(bodyParser.json());
+
+app.use((req, res, next) => {
+	console.log(new Date().toISOString(), 'request', req.url, req.socket?.remoteAddress)
+	next()
+})
 
 app.oauth = new OAuth2Server({
 	model,
@@ -22,11 +26,6 @@ app.oauth = new OAuth2Server({
 });
 
 app.all('/security/oauth/token', obtainToken);
-
-// app.get('/', authenticateRequest, function(req, res) {
-//
-// 	res.send('s area!');
-// });
 
 const redirectUrl = process.env.REDIRECT_BASE_URL
 
@@ -60,7 +59,7 @@ function obtainToken(req, res) {
 
 			res.json(result);
 		}).catch(function(err) {
-
+			console.log('request auth failed', err)
 			res.status(err.code || 500).json(err);
 		});
 }
@@ -71,7 +70,7 @@ function authenticateRequest(req, res, next) {
 	var response = new Response(res);
 
 	return app.oauth.authenticate(request, response)
-		.then(token => {
+		.then(() => {
 
 			next();
 		}).catch(function(err) {
