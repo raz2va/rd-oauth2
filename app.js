@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use((req, res, next) => {
-	console.log(new Date().toISOString(), 'request', req.url, req.socket?.remoteAddress)
+	console.log(new Date().toISOString(), 'request', req.url, req.socket && req.socket.remoteAddress)
 	next()
 })
 
