@@ -6,7 +6,7 @@ var express = require('express'),
 
 require('dotenv').config();
 
-const model = require('./src/model.js');
+const model = require('./includes/model.js');
 
 var app = express();
 
@@ -15,7 +15,18 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use((req, res, next) => {
-	console.log(new Date().toISOString(), 'request', req.url, req.headers['x-forwarded-for'] || req.socket.remoteAddress)
+	const time1 = Date.now();
+	res.on('finish', () => {
+		const time = (Date.now() - time1)/1000;
+		console.log('request',
+			req.url,
+			//req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+			res.statusCode,
+			res.rdAttempts || '',
+			res.rdError || (res._contentLength + 'b'),
+			time + 's')
+	});
+
 	next()
 })
 
@@ -33,9 +44,9 @@ if (redirectUrl) {
 	const username = process.env.REDIRECT_USER,
 		password = process.env.REDIRECT_PASSWORD,
 		auth = "Basic " + new Buffer.from(username + ":" + password).toString("base64");
-	app.use('/', authenticateRequest, require('./src/redirect_route')(redirectUrl, auth))
+	app.use('/', authenticateRequest, require('./includes/redirect_route')(redirectUrl, auth))
 } else {
-	app.use('/', authenticateRequest, require('./src/dummy_routes'))
+	app.use('/', authenticateRequest, require('./includes/dummy_routes'))
 }
 
 const port = process.env.PORT || 3011
